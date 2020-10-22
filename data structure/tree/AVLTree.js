@@ -53,6 +53,93 @@ class AVLTree {
         this.root = this.add(this.root, value)
     }
 
+    _delete(rootNode, deleteNode) {
+        if (!deleteNode || !rootNode) {
+            return rootNode
+        }
+        if (deleteNode.value < rootNode.value) {
+            rootNode.left = this._delete(rootNode.left, deleteNode)
+            if (this.height(rootNode.right) - this.height(rootNode.left) > 1) {
+                let rightNode = rootNode.right
+                // RL
+                if (this.height(rightNode.left) > this.height(rightNode.right)) {
+                    rootNode = this.RLRotate(rootNode)
+
+                // RR
+                } else {
+                    rootNode = this.RRRotate(rootNode)
+                }
+            }
+        } else if (deleteNode.value > rootNode.value) {
+            rootNode.right = this._delete(rootNode.right, deleteNode)
+            if (this.height(rootNode.left) - this.height(rootNode.right) > 1) {
+                let leftNode = rootNode.left
+                // LR
+                if (this.height(leftNode.right) > this.height(leftNode.left)) {
+                    rootNode = this.LRRotate(rootNode)
+
+                // LL
+                } else {
+                    rootNode = this.LLRotate(rootNode)
+                }
+            }
+        } else {
+            if (deleteNode.left && deleteNode.right) {
+                if (this.height(deleteNode.left) > this.height(deleteNode.right)) {
+                    let max = this.findMax(deleteNode.left)
+                    deleteNode.value = max.value
+                    deleteNode.left = this._delete(deleteNode.left, max)
+                } else {
+                    let min = this.findMin(deleteNode.right)
+                    deleteNode.value = min.value
+                    deleteNode.right = this._delete(deleteNode.right, min)
+                }
+            } else {
+                rootNode = rootNode.left ? rootNode.left : rootNode.right
+            }
+        }
+        return rootNode
+    }
+
+    delete(value) {
+        this.root = this._delete(this.root, this.find(value))
+    }
+
+    find(value) {
+        let currentNode = this.root
+        while (currentNode) {
+            if (currentNode.value === value) {
+                return currentNode
+            } else if (value < currentNode.value) {
+                currentNode = currentNode.left
+            } else {
+                currentNode = currentNode.right
+            }
+        }
+        return null
+    }
+    findMin(node) {
+        if (!node) {
+            return null
+        }
+        let currentNode = node
+        while(currentNode.left) {
+            currentNode = currentNode.left
+        }
+        return currentNode
+    }
+
+    findMax(node) {
+        if (!node) {
+            return null
+        }
+        let currentNode = node
+        while(currentNode.right) {
+            currentNode = currentNode.right
+        }
+        return currentNode
+    }
+
     LLRotate(rootNode) {
         let leftNode = rootNode.left
         rootNode.left = leftNode.right
@@ -108,15 +195,34 @@ class AVLTree {
     }
 }
 function testAdd() {
-    let bst = new AVLTree()
+    let avl = new AVLTree()
     let values = [15, 6, 3, 2, 4, 7, 13, 9, 18, 17, 20]
     values.forEach(v => {
-        bst.insert(v)
+        avl.insert(v)
         console.log(`insert ${v} ::`)
-        console.log(bst.preOrder())
-        console.log(bst.inOrder())
+        console.log(avl.preOrder())
+        console.log(avl.inOrder())
         console.log('*************************************')
     })
 }
 
-testAdd()
+function testDelete() {
+    let avl = new AVLTree()
+    let values = [15, 6, 3, 2, 4, 7, 13, 9, 18, 17, 20]
+    values.forEach(v => {
+        avl.insert(v)
+    });
+    console.log(avl.preOrder())
+    console.log(avl.inOrder())
+    console.log('*************************************');
+    [20, 7, 9, 6].forEach(v => {
+        avl.delete(v)
+        console.log(`delete ${v} ::`)
+        console.log(avl.preOrder())
+        console.log(avl.inOrder())
+        console.log('*************************************')
+    })
+}
+
+// testAdd()
+testDelete()
